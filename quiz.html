@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Fortune Quiz ♥</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --rose: #ff6b9d;
+            --deep-rose: #c44569;
+            --blush: #ffeef8;
+            --cream: #fff5f7;
+            --deep-purple: #543864;
+            --text: #2d1b2e;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(135deg, var(--blush) 0%, var(--cream) 50%, #ffe9f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .bg-hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-heart {
+            position: absolute;
+            color: var(--rose);
+            opacity: 0.1;
+            animation: float-up 15s infinite ease-in-out;
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.1; }
+            90% { opacity: 0.1; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            background: var(--deep-purple);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            background: var(--deep-rose);
+            transform: translateX(-5px);
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0 15px 40px rgba(255, 107, 157, 0.2);
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--deep-purple);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .question {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--deep-rose);
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: var(--cream);
+            border: 2px solid var(--rose);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+
+        .option:hover {
+            background: var(--rose);
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .result-container {
+            text-align: center;
+            animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .result-container h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--deep-rose);
+            margin-bottom: 20px;
+        }
+
+        .result-container p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: var(--text);
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, var(--rose), var(--deep-rose));
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 15px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 30px 20px;
+            }
+
+            .question {
+                font-size: 1.5rem;
+            }
+
+            .option {
+                font-size: 1.1rem;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-hearts" id="bgHearts"></div>
+    
+    <div class="container">
+        <a href="index.html" class="back-btn">← Back to Home</a>
+        <div class="quiz-container" id="quiz-content"></div>
+    </div>
+
+    <script>
+        // Background floating hearts
+        function createBgHearts() {
+            const container = document.getElementById('bgHearts');
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'bg-heart';
+                heart.textContent = '♥';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                heart.style.animationDelay = Math.random() * 15 + 's';
+                heart.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(heart);
+            }
+        }
+        createBgHearts();
+
+        // Quiz Questions
+        const quizQuestions = [
+            {
+                question: "What's your ideal Valentine's Day date?",
+                options: [
+                    "Romantic candlelit dinner",
+                    "Adventure and outdoor activities",
+                    "Cozy movie night at home",
+                    "Surprise getaway trip"
+                ]
+            },
+            {
+                question: "How do you express love?",
+                options: [
+                    "Through heartfelt words",
+                    "With thoughtful gifts",
+                    "Quality time together",
+                    "Acts of service"
+                ]
+            },
+            {
+                question: "What's your love language?",
+                options: [
+                    "Physical touch and affection",
+                    "Words of affirmation",
+                    "Receiving gifts",
+                    "Acts of service"
+                ]
+            },
+            {
+                question: "Pick a romantic movie:",
+                options: [
+                    "The Notebook",
+                    "La La Land",
+                    "Pride and Prejudice",
+                    "Eternal Sunshine of the Spotless Mind"
+                ]
+            },
+            {
+                question: "Your perfect partner is:",
+                options: [
+                    "Passionate and spontaneous",
+                    "Thoughtful and caring",
+                    "Adventurous and fun",
+                    "Intelligent and deep"
+                ]
+            }
+        ];
+
+        const quizResults = [
+            {
+                title: "💖 The Romantic Dreamer",
+                message: "You believe in fairy tale love and grand gestures. Your heart is full of passion, and you're destined for a love story that sweeps you off your feet. Keep your heart open, your soulmate is closer than you think!"
+            },
+            {
+                title: "🌹 The Devoted Partner",
+                message: "You value loyalty, trust, and deep connection. Your love runs deep like an ancient river. You're the type who builds lasting relationships based on mutual respect and understanding. True love awaits you!"
+            },
+            {
+                title: "✨ The Free Spirit",
+                message: "You believe love should be an adventure! You seek a partner who matches your energy and zest for life. Your spontaneous nature attracts kindred spirits. Get ready for exciting romantic adventures!"
+            },
+            {
+                title: "💝 The Thoughtful Soul",
+                message: "You express love through actions and attention to detail. You notice the little things that matter most. Your caring nature creates deep, meaningful bonds. Someone special appreciates everything you do!"
+            },
+            {
+                title: "🎭 The Passionate Artist",
+                message: "Love for you is poetry in motion. You feel deeply and express beautifully. Your creative soul seeks a muse who understands your artistic heart. A passionate romance is written in your stars!"
+            },
+            {
+                title: "🌙 The Mysterious Enchanter",
+                message: "You're intriguing, deep, and full of surprises. Your enigmatic nature draws people in like moths to a flame. You seek connection beyond the surface. A profound love awaits those who truly see you!"
+            },
+            {
+                title: "☀️ The Joyful Optimist",
+                message: "Your positive energy is infectious! You bring light into every relationship and believe in the power of laughter and joy. Your sunny disposition attracts others naturally. Love blooms wherever you go!"
+            },
+            {
+                title: "🎪 The Adventurous Explorer",
+                message: "For you, love is the greatest adventure of all! You seek a partner ready to explore the world with you. Your courage and curiosity make every moment exciting. Epic romance awaits!"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let quizAnswers = [];
+
+        function startQuiz() {
+            currentQuestion = 0;
+            quizAnswers = [];
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const container = document.getElementById('quiz-content');
+            if (currentQuestion < quizQuestions.length) {
+                const q = quizQuestions[currentQuestion];
+                container.innerHTML = `
+                    <div class="progress-text">Question ${currentQuestion + 1} of ${quizQuestions.length}</div>
+                    <h2 class="question">${q.question}</h2>
+                    <div class="options">
+                        ${q.options.map((opt, idx) => 
+                            `<div class="option" onclick="answerQuestion(${idx})">${opt}</div>`
+                        ).join('')}
+                    </div>
+                `;
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function answerQuestion(answerIdx) {
+            quizAnswers.push(answerIdx);
+            currentQuestion++;
+            showQuestion();
+        }
+
+        function showQuizResult() {
+            const sum = quizAnswers.reduce((a, b) => a + b, 0);
+            const resultIdx = sum % quizResults.length;
+            const result = quizResults[resultIdx];
+            
+            document.getElementById('quiz-content').innerHTML = `
+                <div class="result-container">
+                    <h2>${result.title}</h2>
+                    <p>${result.message}</p>
+                    <button class="restart-btn" onclick="startQuiz()">Take Quiz Again ♥</button>
+                </div>
+            `;
+        }
+
+        // Start the quiz when page loads
+        startQuiz();
+    </script>
+</body>
+</html>
